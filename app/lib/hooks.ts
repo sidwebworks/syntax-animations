@@ -7,7 +7,7 @@ import { withCache } from "./utils";
 
 export const useSyntaxHighlighter = () => {
   const editor = useEditorStore();
-  const onSettingChange = useSettingsStore((s) => s.onSettingChange);
+  const { onSettingChange, theme } = useSettingsStore();
   const highlighter = editor.highlighter!;
   const monaco = editor.monaco!;
 
@@ -23,6 +23,7 @@ export const useSyntaxHighlighter = () => {
       monaco.languages.register({ id: value });
       shikiToMonaco(highlighter, monaco);
       monaco.editor.getModels().map((m) => monaco.editor.setModelLanguage(m, value));
+      monaco.editor.setTheme(theme);
       onSettingChange("language", value);
     } catch (error: any) {
       toast(`Failed to change language - ${value}`);

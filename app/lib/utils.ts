@@ -26,6 +26,7 @@ export const APP_TEXT_MAPPING = {
     [EditorStatus.Idle]: "idle",
     [EditorStatus.LoadingGrammar]: "loading grammar",
     [EditorStatus.LoadingTheme]: "loading theme",
+    [EditorStatus.Saving]: "saving project",
   },
 };
 

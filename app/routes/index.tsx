@@ -1,6 +1,6 @@
 import { CodeEditor } from "~/components/CodeEditor";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
-import { setup, useSettingsStore, useTimelineStore } from "~/lib/store";
+import { EditorStatus, setup, useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
 import type { Route } from "./+types/index";
 
 import PreviewRender from "~/components/PreviewRender";
@@ -33,19 +33,22 @@ export async function clientLoader() {
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { enablePreviewPanel, enableRenderPanel } = useSettingsStore();
   const save = useTimelineStore((s) => s.save);
+  const setStatus = useEditorStore((s) => s.setStatus);
 
-  const onSave = () => {
+  const onSave = async () => {
     if (!loaderData.supported) return;
-    return save();
+    setStatus(EditorStatus.Saving);
+    await save();
+    setStatus(EditorStatus.Idle);
   };
 
-  useInterval(onSave, 10000, { autoInvoke: true });
-  useBeforeUnload(onSave);
+  useInterval(() => onSave(), 5000, { autoInvoke: true });
+  useBeforeUnload(() => onSave());
 
   return (
     <div className="h-full flex flex-col">
       <DeviceSupportDialog supported={loaderData.supported} />
-      <ToolBar />
+      <ToolBar onSave={onSave}/>
       <SettingsDialog />
       {loaderData.supported && (
         <ResizablePanelGroup direction="horizontal" className="">

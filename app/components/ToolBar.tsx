@@ -6,10 +6,10 @@ import { Button } from "./ui/button";
 import { ComboboxPopover } from "./ui/combobox";
 import { Toggle } from "./ui/toggle";
 import { memo } from "react";
-import { Code, EyeIcon, FileCodeIcon, PlayIcon, ScanEyeIcon, Settings } from "lucide-react";
+import { Code, EyeIcon, FileCodeIcon, PlayIcon, SaveIcon, ScanEyeIcon, Settings } from "lucide-react";
 import { APP_TEXT_MAPPING } from "~/lib/utils";
 
-function ToolBar() {
+function ToolBar(props: { onSave: () => void }) {
   const { status } = useEditorStore();
   const { enablePreviewPanel, enableSlidesPanel, language, theme, onSettingChange } = useSettingsStore();
   const { setLanguage, setTheme } = useSyntaxHighlighter();
@@ -21,7 +21,7 @@ function ToolBar() {
     <nav className="flex w-full justify-evenly px-2 py-1.5 gap-2 h-12">
       <span
         className={
-          "uppercase text-xs justify-between flex border text-nowrap items-center gap-x-2 px-4 py-1 rounded-full max-w-max"
+          "text-xs justify-between flex border text-nowrap items-center gap-x-2 px-4 py-1 rounded-full max-w-max"
         }
       >
         {APP_TEXT_MAPPING.status[status]}
@@ -36,6 +36,9 @@ function ToolBar() {
       </div>
 
       <div className="flex ml-auto gap-2 items-center">
+        <Button variant={"outline"} size="icon" onClick={props.onSave}>
+          <SaveIcon className="text-muted-foreground" />
+        </Button>
         <Button variant={"outline"} size="icon" onClick={() => onSettingChange("enableSettingsDialog", true)}>
           <Settings className="text-muted-foreground" />
         </Button>

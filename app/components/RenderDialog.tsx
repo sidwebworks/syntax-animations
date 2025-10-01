@@ -12,7 +12,7 @@ function RenderDialog() {
     <Dialog defaultOpen onOpenChange={(v) => onSettingChange("enableRenderPanel", v)}>
       <DialogContent
         onOpenAutoFocus={(e) => e.preventDefault()}
-        className="aspect-video w-[85%] max-w-none! items-start flex flex-col gap-0 p-0 border-none"
+        className="h-[85%] w-[85%] overflow-auto max-w-none! items-start flex flex-col gap-0 p-0 border-none"
       >
         <DialogTitle className="sr-only absolute">Output Render</DialogTitle>
         <Content />
@@ -85,7 +85,7 @@ function Content() {
         theme={theme}
         highlighter={highlighter!}
         code={trimmed}
-        className="h-full w-full p-4 font-mono!"
+        className="h-full w-full p-4 font-mono! overflow-auto"
         options={moveOptions}
       />
     </div>

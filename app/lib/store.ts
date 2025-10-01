@@ -24,6 +24,7 @@ export enum EditorStatus {
   LoadingGrammar,
   Error,
   Idle,
+  Saving,
 }
 
 export type TEditorState = {
@@ -248,8 +249,6 @@ export const useTimelineStore = create(
 
       const { slides, order } = get();
 
-      projectData.setItem(ProjectDataKeys.Order, order);
-
       const dehydrated: DehydratedSlides = {};
 
       for (const id of order) {
@@ -267,9 +266,10 @@ export const useTimelineStore = create(
           uri: model.uri.toString(),
           code: model.getValue(),
         };
-
-        await projectData.setItem(ProjectDataKeys.Slides, dehydrated);
       }
+
+      await projectData.setItem(ProjectDataKeys.Order, order);
+      await projectData.setItem(ProjectDataKeys.Slides, dehydrated);
     },
   }))
 );

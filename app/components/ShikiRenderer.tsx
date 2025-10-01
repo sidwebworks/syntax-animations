@@ -129,7 +129,7 @@ export const ShikiMagicMoveRenderer = React.memo(
     }, [tokens]);
 
     return (
-      <pre ref={container} className={`shiki-magic-move-container ${className || ""}`.trim()} style={style}>
+      <pre ref={container} className={`shiki-magic-move-container min-h-max h-full ${className || ""}`.trim()} style={style}>
         <div>
           {isMounted
             ? undefined

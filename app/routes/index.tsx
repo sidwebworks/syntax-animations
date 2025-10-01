@@ -11,38 +11,55 @@ import { useInterval } from "@mantine/hooks";
 import SettingsDialog from "~/components/SettingsDialog";
 import RenderDialog from "~/components/RenderDialog";
 import { DeviceSupportDialog } from "~/components/DeviceSupport";
+import { getRequiredBrowserFeatures } from "~/lib/utils";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Animated Syntax" }, { name: "description", content: "Write and animate your code snippets!" }];
 }
 
 export async function clientLoader() {
+  const features = getRequiredBrowserFeatures();
+
+  const supported = features.every((r) => {
+    const type = typeof r[0];
+    return type === r[1];
+  });
+
   await setup();
+
+  return { supported };
 }
 
-export default function Home() {
+export default function Home({ loaderData }: Route.ComponentProps) {
   const { enablePreviewPanel, enableRenderPanel } = useSettingsStore();
   const save = useTimelineStore((s) => s.save);
 
-  useInterval(() => save(), 10000, { autoInvoke: true });
-  useBeforeUnload(() => save());
+  const onSave = () => {
+    if (!loaderData.supported) return;
+    return save();
+  };
+
+  useInterval(onSave, 10000, { autoInvoke: true });
+  useBeforeUnload(onSave);
 
   return (
     <div className="h-full flex flex-col">
-      <DeviceSupportDialog />
+      <DeviceSupportDialog supported={loaderData.supported} />
       <ToolBar />
       <SettingsDialog />
-      <ResizablePanelGroup direction="horizontal" className="">
-        <ResizablePanel defaultSize={50}>
-          <CodeEditor />
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        {enablePreviewPanel && (
-          <ResizablePanel defaultSize={50} minSize={20}>
-            <PreviewRender />
+      {loaderData.supported && (
+        <ResizablePanelGroup direction="horizontal" className="">
+          <ResizablePanel defaultSize={50}>
+            <CodeEditor />
           </ResizablePanel>
-        )}
-      </ResizablePanelGroup>
+          <ResizableHandle withHandle />
+          {enablePreviewPanel && (
+            <ResizablePanel defaultSize={50} minSize={20}>
+              <PreviewRender />
+            </ResizablePanel>
+          )}
+        </ResizablePanelGroup>
+      )}
       {enableRenderPanel && <RenderDialog />}
       <SlidesPanel />
     </div>

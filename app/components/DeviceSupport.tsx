@@ -1,6 +1,5 @@
-import { useIsomorphicLayoutEffect } from "@dnd-kit/utilities";
 import { ChromeIcon, Hammer } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
   AlertDialog,
@@ -11,21 +10,14 @@ import {
   AlertDialogOverlay,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog"; // Adjust path as needed
-import { getRequiredBrowserFeatures } from "~/lib/utils";
 import { Button } from "./ui/button";
 
-export function DeviceSupportDialog() {
+export function DeviceSupportDialog(props: { supported: boolean }) {
   const [open, setOpen] = useState(false);
 
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     const check = () => {
-      const features = getRequiredBrowserFeatures();
-      const supported = features.every((r) => {
-        const type = typeof r[0];
-        return type === r[1];
-      });
-
-      setOpen(!supported || window.innerWidth < 768);
+      setOpen(!props.supported || window.innerWidth < 768);
     };
 
     check(); // Initial check
@@ -33,11 +25,11 @@ export function DeviceSupportDialog() {
     // Optional: Re-check on resize
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
-  }, []);
+  }, [props.supported]);
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogOverlay className="backdrop-blur-xs" />
+      <AlertDialogOverlay className="backdrop-blur-[1px]" />
       <AlertDialogContent className="items-center">
         <AlertDialogHeader>
           <AlertDialogTitle>Unsupported Browser</AlertDialogTitle>

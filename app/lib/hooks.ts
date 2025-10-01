@@ -6,16 +6,17 @@ import { EditorStatus, useEditorStore, type TSettingsState } from "./store";
 import { withCache } from "./utils";
 
 export const useSyntaxHighlighter = () => {
-  const { highlighter, monaco, setStatus } = useEditorStore();
+  const editor = useEditorStore();
 
-  if (!highlighter || !monaco) throw new Error(`Editor services not initialized`);
+  const highlighter = editor.highlighter!;
+  const monaco = editor.monaco!;
 
   const setLanguage = async (value: TSettingsState["language"]) => {
     try {
       const data = await withCache(`textmate_lang_${value}`, async () => {
-        setStatus(EditorStatus.LoadingGrammar);
+        editor.setStatus(EditorStatus.LoadingGrammar);
         const grammar = await getTextmateGrammar(value);
-        setStatus(EditorStatus.Idle);
+        editor.setStatus(EditorStatus.Idle);
         return grammar;
       });
       await highlighter.loadLanguage(data);
@@ -29,9 +30,9 @@ export const useSyntaxHighlighter = () => {
   const setTheme = async (value: TSettingsState["theme"]) => {
     try {
       const data = await withCache(`textmate_theme_${value}`, async () => {
-        setStatus(EditorStatus.LoadingTheme);
+        editor.setStatus(EditorStatus.LoadingTheme);
         const theme = await getTextmateTheme(value);
-        setStatus(EditorStatus.Idle);
+        editor.setStatus(EditorStatus.Idle);
         return theme;
       });
       await highlighter.loadTheme(data);

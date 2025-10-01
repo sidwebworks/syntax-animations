@@ -34,7 +34,9 @@ export const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 export const getRequiredBrowserFeatures = (): [any, JSTypeofResult][] => {
   return [
     [navigator?.mediaDevices?.getDisplayMedia, "function"],
+    // @ts-expect-error
     [window.RestrictionTarget, "function"],
+    // @ts-expect-error
     [window.CropTarget, "function"],
     [MediaRecorder, "function"],
   ];

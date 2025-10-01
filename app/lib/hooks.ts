@@ -2,11 +2,12 @@ import { shikiToMonaco } from "@shikijs/monaco";
 import "shiki-magic-move/dist/style.css";
 import { toast } from "sonner";
 import { getTextmateGrammar, getTextmateTheme } from "./api";
-import { EditorStatus, useEditorStore, type TSettingsState } from "./store";
+import { EditorStatus, useEditorStore, useSettingsStore, type TSettingsState } from "./store";
 import { withCache } from "./utils";
 
 export const useSyntaxHighlighter = () => {
   const editor = useEditorStore();
+  const onSettingChange = useSettingsStore((s) => s.onSettingChange);
   const highlighter = editor.highlighter!;
   const monaco = editor.monaco!;
 
@@ -22,8 +23,9 @@ export const useSyntaxHighlighter = () => {
       monaco.languages.register({ id: value });
       shikiToMonaco(highlighter, monaco);
       monaco.editor.getModels().map((m) => monaco.editor.setModelLanguage(m, value));
+      onSettingChange("language", value);
     } catch (error: any) {
-      toast(`Failed to load language - ${value}`);
+      toast(`Failed to change language - ${value}`);
     }
   };
 
@@ -37,8 +39,9 @@ export const useSyntaxHighlighter = () => {
       });
       highlighter.loadThemeSync(data);
       shikiToMonaco(highlighter, monaco);
+      onSettingChange("theme", value);
     } catch (error: any) {
-      toast(`Failed to load theme - ${value}`);
+      toast(`Failed to change theme - ${value}`);
     }
   };
 

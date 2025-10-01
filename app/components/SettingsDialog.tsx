@@ -27,12 +27,10 @@ function SettingsDialog() {
 
   const onLanguageChange = async (language: TSettingsState["language"]) => {
     await setLanguage(language);
-    onSettingChange("language", language);
   };
 
   const onThemeChange = async (theme: TSettingsState["theme"]) => {
     await setTheme(theme);
-    onSettingChange("theme", theme);
   };
 
   const onMoveOptionChange = <S extends TSettingsState["moveOptions"], K extends keyof S>(name: K, value: S[K]) => {

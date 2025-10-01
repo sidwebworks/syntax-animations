@@ -10,6 +10,7 @@ import { useBeforeUnload, useBlocker } from "react-router";
 import { useInterval } from "@mantine/hooks";
 import SettingsDialog from "~/components/SettingsDialog";
 import RenderDialog from "~/components/RenderDialog";
+import { MobileUnsupportedDialog } from "~/components/MobileSupport";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "New React Router App" }, { name: "description", content: "Welcome to React Router!" }];
@@ -28,6 +29,7 @@ export default function Home() {
 
   return (
     <div className="h-full flex flex-col">
+      <MobileUnsupportedDialog />
       <ToolBar />
       <SettingsDialog />
       <ResizablePanelGroup direction="horizontal" className="">

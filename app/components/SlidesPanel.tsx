@@ -49,7 +49,7 @@ function SlidesPanel() {
         onInteractOutside={(e) => e.preventDefault()}
         side="bottom"
         aria-description="Slide editor"
-        className="h-[13rem] outline-none px-2 w-full"
+        className="h-[13rem] outline-none px-2 w-full isolate z-40"
       >
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SheetHeader className="flex justify-center items-end px-1 h-20">

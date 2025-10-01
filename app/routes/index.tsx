@@ -13,7 +13,7 @@ import RenderDialog from "~/components/RenderDialog";
 import { MobileUnsupportedDialog } from "~/components/MobileSupport";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "New React Router App" }, { name: "description", content: "Welcome to React Router!" }];
+  return [{ title: "Animated Syntax" }, { name: "description", content: "Write and animate your code snippets!" }];
 }
 
 export async function clientLoader() {

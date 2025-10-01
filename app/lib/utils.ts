@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { httpCache } from "./cache";
 import { EditorStatus } from "./store";
+import type { JSTypeofResult } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -29,3 +30,12 @@ export const APP_TEXT_MAPPING = {
 };
 
 export const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
+
+export const getRequiredBrowserFeatures = (): [any, JSTypeofResult][] => {
+  return [
+    [navigator?.mediaDevices?.getDisplayMedia, "function"],
+    [window.RestrictionTarget, "function"],
+    [window.CropTarget, "function"],
+    [MediaRecorder, "function"],
+  ];
+};

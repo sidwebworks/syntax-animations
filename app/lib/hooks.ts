@@ -62,7 +62,7 @@ export function useScreenRecorder(options?: UseScreenRecorderOptions) {
 
         if (!output) throw new Error("Ref element not found");
 
-        document.body.style.cursor = "none";
+        output.parentElement!.style.cursor = "none";
 
         // Get display media
         const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -79,7 +79,6 @@ export function useScreenRecorder(options?: UseScreenRecorderOptions) {
         // Apply restriction and cropping
         const restrictionTarget = await RestrictionTarget.fromElement(output);
         await track.restrictTo(restrictionTarget);
-
         const cropTarget = await CropTarget.fromElement(output);
         await track.cropTo(cropTarget);
 
@@ -134,9 +133,12 @@ export function useScreenRecorder(options?: UseScreenRecorderOptions) {
     [options]
   );
 
-  const stopRecording = useCallback(() => {
-    document.body.style.cursor = "unset";
-    mediaRecorderRef.current.stop();
+  const stopRecording = useCallback((ref: React.RefObject<HTMLElement | null>) => {
+    const output = ref.current!;
+
+    if (output) output.parentElement!.style.cursor = "unset";
+
+    mediaRecorderRef.current?.stop();
     mediaRecorderRef.current = null;
   }, []);
 

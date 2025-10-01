@@ -10,7 +10,7 @@ import { useBeforeUnload, useBlocker } from "react-router";
 import { useInterval } from "@mantine/hooks";
 import SettingsDialog from "~/components/SettingsDialog";
 import RenderDialog from "~/components/RenderDialog";
-import { MobileUnsupportedDialog } from "~/components/MobileSupport";
+import { DeviceSupportDialog } from "~/components/DeviceSupport";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Animated Syntax" }, { name: "description", content: "Write and animate your code snippets!" }];
@@ -29,7 +29,7 @@ export default function Home() {
 
   return (
     <div className="h-full flex flex-col">
-      <MobileUnsupportedDialog />
+      <DeviceSupportDialog />
       <ToolBar />
       <SettingsDialog />
       <ResizablePanelGroup direction="horizontal" className="">

@@ -12,7 +12,7 @@ function RenderDialog() {
     <Dialog defaultOpen onOpenChange={(v) => onSettingChange("enableRenderPanel", v)}>
       <DialogContent
         onOpenAutoFocus={(e) => e.preventDefault()}
-        className="aspect-video cursor-none! w-[85%] max-w-none! items-start flex flex-col gap-0 p-0 border-none"
+        className="aspect-video w-[85%] max-w-none! items-start flex flex-col gap-0 p-0 border-none"
       >
         <DialogTitle className="sr-only absolute">Output Render</DialogTitle>
         <Content />
@@ -33,7 +33,7 @@ function Content() {
   const onEnd = async () => {
     setStatus(EditorStatus.Idle);
     setCode("");
-    recorder.stopRecording();
+    recorder.stopRecording(renderRef);
     onSettingChange("enableRenderPanel", false);
   };
 

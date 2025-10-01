@@ -67,7 +67,7 @@ function SettingsDialog() {
             className="flex flex-col w-full content-start place-items-start justify-start py-2 gap-y-3"
           >
             <ComboboxPopover
-              label="Language"
+              label="Theme"
               placeholder="Select a theme"
               items={THEMES}
               value={theme}
@@ -76,7 +76,7 @@ function SettingsDialog() {
               <BlendingModeIcon className="size-4" />
             </ComboboxPopover>
             <ComboboxPopover
-              label="Theme"
+              label="Language"
               placeholder="Select a language"
               items={LANGUAGES}
               value={language}

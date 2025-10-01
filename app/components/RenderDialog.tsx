@@ -39,6 +39,7 @@ function Content() {
 
   const onStart = async () => {
     setStatus(EditorStatus.Animating);
+    onSettingChange("enableSlidesPanel", false);
     await sleep(1000);
     await recorder.startRecording(renderRef);
   };

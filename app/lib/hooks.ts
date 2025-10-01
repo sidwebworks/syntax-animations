@@ -7,7 +7,6 @@ import { withCache } from "./utils";
 
 export const useSyntaxHighlighter = () => {
   const editor = useEditorStore();
-
   const highlighter = editor.highlighter!;
   const monaco = editor.monaco!;
 
@@ -19,8 +18,9 @@ export const useSyntaxHighlighter = () => {
         editor.setStatus(EditorStatus.Idle);
         return grammar;
       });
-      await highlighter.loadLanguage(data);
+      highlighter.loadLanguageSync(data);
       monaco.languages.register({ id: value });
+      shikiToMonaco(highlighter, monaco);
       monaco.editor.getModels().map((m) => monaco.editor.setModelLanguage(m, value));
     } catch (error: any) {
       toast(`Failed to load language - ${value}`);
@@ -35,7 +35,7 @@ export const useSyntaxHighlighter = () => {
         editor.setStatus(EditorStatus.Idle);
         return theme;
       });
-      await highlighter.loadTheme(data);
+      highlighter.loadThemeSync(data);
       shikiToMonaco(highlighter, monaco);
     } catch (error: any) {
       toast(`Failed to load theme - ${value}`);

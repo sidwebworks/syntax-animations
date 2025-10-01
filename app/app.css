@@ -185,7 +185,16 @@ monaco-editor {
   width: 100%;
 }
 
+.mtku {
+  text-decoration: none !important;
+}
+
+.mtki {
+  font-style: normal !important;
+}
+
 pre {
   font-feature-settings: "liga", "calt";
   font-variation-settings: normal;
+  font-style: "regular";
 }

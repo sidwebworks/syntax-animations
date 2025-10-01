@@ -15,6 +15,7 @@ const EDITOR_OPTIONS = {
   minimap: { enabled: false },
   fontFamily: "Fira Code",
   fontLigatures: true,
+  "semanticHighlighting.enabled": false,
   fontSize: 16,
 } as editor.IStandaloneEditorConstructionOptions;
 
@@ -32,7 +33,10 @@ export function CodeEditor(props: Props) {
     };
   }, [active]);
 
-  const onMount: OnMount = (editor, monaco) => {};
+  const onMount: OnMount = (editor, monaco) => {
+    const model = editor.getModel()
+    monaco.editor.setModelLanguage(model!, language)
+  };
 
   const onBeforeMount: BeforeMount = async (monaco) => {
     monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({

@@ -1,18 +1,14 @@
-import { BlendingModeIcon, LayersIcon, TextIcon, VideoIcon, ViewVerticalIcon } from "@radix-ui/react-icons";
-import { bundledLanguages, bundledThemes, type BundledLanguage, type BundledTheme } from "shiki";
-import { useSyntaxHighlighter } from "~/lib/hooks";
-import { useEditorStore, useSettingsStore, useTimelineStore, type TSettingsState } from "~/lib/store";
-import { Button } from "./ui/button";
-import { ComboboxPopover } from "./ui/combobox";
-import { Toggle } from "./ui/toggle";
+import { LayersIcon, ViewVerticalIcon } from "@radix-ui/react-icons";
+import { FileCodeIcon, PlayIcon, SaveIcon, Settings } from "lucide-react";
 import { memo } from "react";
-import { Code, EyeIcon, FileCodeIcon, PlayIcon, SaveIcon, ScanEyeIcon, Settings } from "lucide-react";
+import { useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
 import { APP_TEXT_MAPPING } from "~/lib/utils";
+import { Button } from "./ui/button";
+import { Toggle } from "./ui/toggle";
 
 function ToolBar(props: { onSave: () => void }) {
   const { status } = useEditorStore();
-  const { enablePreviewPanel, enableSlidesPanel, language, theme, onSettingChange } = useSettingsStore();
-  const { setLanguage, setTheme } = useSyntaxHighlighter();
+  const { enablePreviewPanel, enableSlidesPanel, onSettingChange } = useSettingsStore();
   const { active, order } = useTimelineStore();
 
   const index = order.findIndex((el) => el === active) + 1;
@@ -35,7 +31,7 @@ function ToolBar(props: { onSave: () => void }) {
         Frame {index} <FileCodeIcon className="size-4" />
       </div>
 
-      <div className="flex ml-auto gap-2 items-center">
+      <div className="flex ml-auto items-center [&>button]:rounded-none [&>button:last-child]:rounded-r-md [&>button:nth-child(1)]:rounded-l-md [&>*:nth-child(n+2):nth-child(-n+5)]:border-l-0">
         <Button variant={"outline"} size="icon" onClick={props.onSave}>
           <SaveIcon className="text-muted-foreground" />
         </Button>

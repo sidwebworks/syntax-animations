@@ -34,8 +34,8 @@ export function CodeEditor(props: Props) {
   }, [active]);
 
   const onMount: OnMount = (editor, monaco) => {
-    const model = editor.getModel()
-    monaco.editor.setModelLanguage(model!, language)
+    const model = editor.getModel();
+    monaco.editor.setModelLanguage(model!, language);
   };
 
   const onBeforeMount: BeforeMount = async (monaco) => {
@@ -54,7 +54,7 @@ export function CodeEditor(props: Props) {
       <Editor
         saveViewState
         className={cn("w-full h-full transition-[filter] duration-500", blurred && "blur-[2px] pointer-events-none")}
-        loading={<Loader className="animate-spin duration-200" />}
+        loading={null}
         theme={theme}
         language={language}
         path={item.uri}

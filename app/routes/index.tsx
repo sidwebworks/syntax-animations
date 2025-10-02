@@ -14,7 +14,30 @@ import { DeviceSupportDialog } from "~/components/DeviceSupport";
 import { getRequiredBrowserFeatures } from "~/lib/utils";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Animated Syntax" }, { name: "description", content: "Write and animate your code snippets!" }];
+  const title = "Syntax Animations";
+  const description = "Easily animate code snippets and save them as videos.";
+  const url = "https://syntax.rathi.sh";
+  const image = "https://syntax.rathi.sh/og_preview.png";
+
+  return [
+    { title },
+    { name: "description", content: description },
+
+    // Open Graph
+    { property: "og:url", content: url },
+    { property: "og:type", content: "website" },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:image", content: image },
+
+    // Twitter
+    { name: "twitter:card", content: "summary_large_image" },
+    { property: "twitter:domain", content: "syntax.rathi.sh" },
+    { property: "twitter:url", content: url },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+    { name: "twitter:image", content: image },
+  ];
 }
 
 export async function clientLoader() {
@@ -48,7 +71,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   return (
     <div className="h-full flex flex-col">
       <DeviceSupportDialog supported={loaderData.supported} />
-      <ToolBar onSave={onSave}/>
+      <ToolBar onSave={onSave} />
       <SettingsDialog />
       {loaderData.supported && (
         <ResizablePanelGroup direction="horizontal" className="">

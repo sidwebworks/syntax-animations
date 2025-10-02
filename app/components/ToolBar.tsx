@@ -1,10 +1,11 @@
-import { LayersIcon, ViewVerticalIcon } from "@radix-ui/react-icons";
+import { GitHubLogoIcon, LayersIcon, ViewVerticalIcon } from "@radix-ui/react-icons";
 import { FileCodeIcon, PlayIcon, SaveIcon, Settings } from "lucide-react";
 import { memo } from "react";
 import { useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
 import { APP_TEXT_MAPPING } from "~/lib/utils";
 import { Button } from "./ui/button";
 import { Toggle } from "./ui/toggle";
+import { Link } from "react-router";
 
 function ToolBar(props: { onSave: () => void }) {
   const { status } = useEditorStore();
@@ -15,6 +16,11 @@ function ToolBar(props: { onSave: () => void }) {
 
   return (
     <nav className="flex w-full justify-evenly px-2 py-1.5 gap-2 h-12">
+      <Button variant={"ghost"} size="icon" asChild>
+        <Link target="_blank" rel="norefferer noopener" to="https://github.com/sidwebworks/syntax-animations">
+          <GitHubLogoIcon className="text-muted-foreground" />
+        </Link>
+      </Button>
       <span
         className={
           "text-xs justify-between flex border text-nowrap items-center gap-x-2 px-4 py-1 rounded-full max-w-max"

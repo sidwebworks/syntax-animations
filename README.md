@@ -1,87 +1,35 @@
-# Welcome to React Router!
+![Banner](https://github.com/sidwebworks/syntax-animated/blob/main/public/og_preview.png)
 
-A modern, production-ready template for building full-stack React applications using React Router.
+# 🎥 Syntax Animations
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+Turn your code into animated videos for social media, tutorials, or documentation — with style.
 
-## Features
+Unlike plain screen recordings, Syntax Animations works by creating slides for each step of your code. You decide how your snippet evolves — adding lines, refactoring, or changing variables — and the app smoothly animates the transitions between those slides.
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+The result? Beautiful, intentional animations that are clear, educational, and fun to watch.
 
-## Getting Started
+## ✨ Key Features
 
-### Installation
+- 📚 Slide-based code animation – break your code into steps and animate between them.
 
-Install the dependencies:
+- 🌈 Supports any language – powered by TextMate grammars.
 
-```bash
-npm install
-```
+- 🎨 Custom themes – use any color theme for your code.
 
-### Development
+- 📱 Perfect for sharing – great for social media, tutorials, or classroom use.
 
-Start the development server with HMR:
+## 🎬 Usage
 
-```bash
-npm run dev
-```
+- Paste or write your code.
 
-Your application will be available at `http://localhost:5173`.
+- Create slides for each step or change.
 
-## Building for Production
+- Preview transitions automatically between slides.
 
-Create a production build:
+- Play and Export as video ready to share online.
 
-```bash
-npm run build
-```
+👉 Try it live: https://syntax.rathi.sh
 
-## Deployment
+## 🤝 Contributing
 
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+Contributions are welcome! Feel free to open issues, suggest features, or submit PRs.

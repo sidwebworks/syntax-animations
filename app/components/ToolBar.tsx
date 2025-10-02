@@ -26,8 +26,8 @@ function ToolBar(props: { onSave: () => void }) {
       >
         {APP_TEXT_MAPPING.status[status]}
         <span className="flex size-2.5 relative">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-          <span className="relative inline-flex size-2.5 rounded-full bg-green-500"></span>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/50 opacity-75"></span>
+          <span className="relative inline-flex size-2.5 rounded-full bg-primary"></span>
         </span>
       </span>
 
@@ -57,7 +57,7 @@ function ToolBar(props: { onSave: () => void }) {
           <LayersIcon className="size-4" />
         </Toggle>
         <Button variant={"outline"} size="icon" onClick={() => onSettingChange("enableRenderPanel", true)}>
-          <PlayIcon className="fill-current text-cyan-400" />
+          <PlayIcon className="fill-current text-primary" />
         </Button>
       </div>
     </nav>

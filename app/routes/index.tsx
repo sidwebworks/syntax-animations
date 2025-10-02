@@ -11,7 +11,8 @@ import { useInterval } from "@mantine/hooks";
 import SettingsDialog from "~/components/SettingsDialog";
 import RenderDialog from "~/components/RenderDialog";
 import { DeviceSupportDialog } from "~/components/DeviceSupport";
-import { getRequiredBrowserFeatures } from "~/lib/utils";
+import { getRequiredBrowserFeatures, sleep } from "~/lib/utils";
+import { Loader } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   const title = "Syntax Animations";
@@ -51,6 +52,14 @@ export async function clientLoader() {
   await setup();
 
   return { supported };
+}
+
+export function HydrateFallback() {
+  return (
+    <div className="grid w-full h-full place-content-center">
+      <Loader className="animate-spin" />
+    </div>
+  );
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {

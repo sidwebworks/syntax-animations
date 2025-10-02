@@ -14,6 +14,7 @@ import { devtools, persist } from "zustand/middleware";
 import { create } from "zustand/react";
 import { projectData, ProjectDataKeys, type DehydratedSlides } from "./cache";
 import type { MoveOptions } from "./types";
+import { CDN_URL } from "./api";
 
 /**
  ** Editor Store
@@ -277,7 +278,7 @@ export const useTimelineStore = create(
 export const setup = async () => {
   loader.config({
     paths: {
-      vs: "https://unpkg.com/monaco-editor@0.52.0/min/vs",
+      vs: `${CDN_URL}/monaco-editor@0.52.0/min/vs`,
     },
   });
 

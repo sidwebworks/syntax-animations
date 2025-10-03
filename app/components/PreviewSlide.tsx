@@ -1,12 +1,12 @@
 import { useDebouncedCallback } from "@mantine/hooks";
-import { useEffect, useMemo, useState, type ComponentProps } from "react";
-import { EditorStatus, useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
+import { useEffect, useMemo, useState } from "react";
+import { useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
 import { ShikiMagicMove } from "./ShikiRenderer";
 
-function PreviewRender() {
+function PreviewSlide() {
   const [code, setCode] = useState("");
   const { language, theme, moveOptions } = useSettingsStore();
-  const { highlighter, monaco, setStatus } = useEditorStore();
+  const { highlighter, monaco } = useEditorStore();
   const { active } = useTimelineStore();
 
   const onChange = useDebouncedCallback((code: string) => setCode(code), { delay: 800 });
@@ -31,7 +31,7 @@ function PreviewRender() {
   const trimmed = useMemo(() => code.split("\n").slice(0, 100).join("\n"), [code]);
 
   return (
-    <div id="preview-render" className="h-full w-full isolate transform-flat will-change-transform font-mono">
+    <div className="h-full w-full isolate transform-flat will-change-transform font-mono">
       <ShikiMagicMove
         key={key}
         lang={language}
@@ -45,4 +45,4 @@ function PreviewRender() {
   );
 }
 
-export default PreviewRender;
+export default PreviewSlide;

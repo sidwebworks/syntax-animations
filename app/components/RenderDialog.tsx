@@ -1,27 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useScreenRecorder } from "~/lib/hooks";
+import { useScreenRecorder } from "~/lib/hooks/use-screen-recorder";
 import { EditorStatus, useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
 import { sleep } from "~/lib/utils";
 import { ShikiMagicMove } from "./ShikiRenderer";
-import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 
-function RenderDialog() {
-  const { onSettingChange } = useSettingsStore();
-
-  return (
-    <Dialog defaultOpen onOpenChange={(v) => onSettingChange("enableRenderPanel", v)}>
-      <DialogContent
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        className="h-[85%] w-[85%] overflow-auto max-w-none! items-start flex flex-col gap-0 p-0 border-none"
-      >
-        <DialogTitle className="sr-only absolute">Output Render</DialogTitle>
-        <Content />
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Content() {
+function RenderDialog(props: { preview: boolean; onClose: () => void }) {
   const [code, setCode] = useState("");
   const { language, theme, moveOptions, onSettingChange } = useSettingsStore();
   const { highlighter, monaco, setStatus } = useEditorStore();
@@ -33,15 +16,15 @@ function Content() {
   const onEnd = async () => {
     setStatus(EditorStatus.Idle);
     setCode("");
-    recorder.stopRecording(renderRef);
-    onSettingChange("enableRenderPanel", false);
+    if (!props.preview) recorder.stop(renderRef);
+    props.onClose();
   };
 
   const onStart = async () => {
     setStatus(EditorStatus.Animating);
     onSettingChange("enableSlidesPanel", false);
     await sleep(1000);
-    await recorder.startRecording(renderRef);
+    if (!props.preview) await recorder.start(renderRef);
   };
 
   const play = async () => {
@@ -59,11 +42,10 @@ function Content() {
       }
 
       await sleep(moveOptions.slideInterval);
-
-      await onEnd();
     } catch (error) {
       console.error(error);
     } finally {
+      await onEnd();
     }
   };
 

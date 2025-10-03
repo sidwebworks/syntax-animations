@@ -1,12 +1,11 @@
-import React from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { useSettingsStore, type TSettingsState } from "~/lib/store";
-import { ComboboxPopover } from "./ui/combobox";
-import { bundledLanguages, bundledThemes, type BundledLanguage, type BundledTheme } from "shiki";
-import { useSyntaxHighlighter } from "~/lib/hooks";
 import { BlendingModeIcon } from "@radix-ui/react-icons";
 import { TextIcon } from "lucide-react";
+import { bundledLanguages, bundledThemes, type BundledLanguage, type BundledTheme } from "shiki";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { useSyntaxHighlighter } from "~/lib/hooks/use-syntax-highlighter";
+import { useSettingsStore, type TSettingsState } from "~/lib/store";
+import { ComboboxPopover } from "./ui/combobox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import InputNumber from "./ui/number-field";
 
 const LANGUAGES = Object.keys(bundledLanguages).map((el) => ({

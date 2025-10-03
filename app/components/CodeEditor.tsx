@@ -1,12 +1,12 @@
-import { useIsomorphicLayoutEffect } from "@dnd-kit/utilities";
 import { Editor, type BeforeMount, type OnChange, type OnMount } from "@monaco-editor/react";
-import { Loader } from "lucide-react";
 import type { editor } from "monaco-editor";
-import { useEffect, useRef, useState } from "react";
-import { EditorStatus, useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
+import { useState } from "react";
+import { useSettingsStore, useTimelineStore } from "~/lib/store";
 import { cn } from "~/lib/utils";
 
-interface Props {}
+interface Props {
+  isBlurred?: boolean;
+}
 
 const EDITOR_OPTIONS = {
   cursorStyle: "line",
@@ -19,23 +19,22 @@ const EDITOR_OPTIONS = {
   fontSize: 16,
 } as editor.IStandaloneEditorConstructionOptions;
 
-export function CodeEditor(props: Props) {
+export function CodeEditor() {
   const [blurred, setBlurred] = useState(false);
   const { language, theme } = useSettingsStore();
-  const { active } = useTimelineStore();
   const item = useTimelineStore((s) => s.slides[s.active]);
-
-  useEffect(() => {
-    setBlurred(true);
-    const timer = setTimeout(() => setBlurred(false), 500);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [active]);
 
   const onMount: OnMount = (editor, monaco) => {
     const model = editor.getModel();
     monaco.editor.setModelLanguage(model!, language);
+
+    let timer: NodeJS.Timeout;
+
+    editor.onWillChangeModel((ev) => {
+      setBlurred(true);
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setBlurred(false), 300);
+    });
   };
 
   const onBeforeMount: BeforeMount = async (monaco) => {
@@ -53,7 +52,10 @@ export function CodeEditor(props: Props) {
     <div className="relative w-full isolate h-full">
       <Editor
         saveViewState
-        className={cn("w-full h-full transition-[filter] duration-500", blurred && "blur-[2px] pointer-events-none")}
+        className={cn(
+          "w-full h-full transition-[filter] ease-out duration-500",
+          blurred && "blur-[2px] pointer-events-none"
+        )}
         loading={null}
         theme={theme}
         language={language}

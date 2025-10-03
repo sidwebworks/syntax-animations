@@ -3,16 +3,16 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "~/componen
 import { EditorStatus, setup, useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
 import type { Route } from "./+types/index";
 
-import PreviewRender from "~/components/PreviewRender";
+import { useInterval } from "@mantine/hooks";
+import { Loader } from "lucide-react";
+import { useBeforeUnload } from "react-router";
+import { DeviceSupportDialog } from "~/components/DeviceSupport";
+import PreviewSlide from "~/components/PreviewSlide";
+import SettingsDialog from "~/components/SettingsDialog";
 import SlidesPanel from "~/components/SlidesPanel";
 import ToolBar from "~/components/ToolBar";
-import { useBeforeUnload, useBlocker } from "react-router";
-import { useInterval } from "@mantine/hooks";
-import SettingsDialog from "~/components/SettingsDialog";
-import RenderDialog from "~/components/RenderDialog";
-import { DeviceSupportDialog } from "~/components/DeviceSupport";
-import { getRequiredBrowserFeatures, sleep } from "~/lib/utils";
-import { Loader } from "lucide-react";
+import { getRequiredBrowserFeatures } from "~/lib/utils";
+import { useRenderOutput } from "~/lib/hooks/use-render-output";
 
 export function meta({}: Route.MetaArgs) {
   const title = "Syntax Animations";
@@ -49,7 +49,7 @@ export async function clientLoader() {
     return type === r[1];
   });
 
-  await setup();
+  if (supported) await setup();
 
   return { supported };
 }
@@ -64,6 +64,7 @@ export function HydrateFallback() {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { enablePreviewPanel, enableRenderPanel } = useSettingsStore();
+  const [RenderOutput, trigger] = useRenderOutput();
   const save = useTimelineStore((s) => s.save);
   const setStatus = useEditorStore((s) => s.setStatus);
 
@@ -80,7 +81,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   return (
     <div className="h-full flex flex-col">
       <DeviceSupportDialog supported={loaderData.supported} />
-      <ToolBar onSave={onSave} />
+      <ToolBar onSave={onSave} onPlay={trigger} />
       <SettingsDialog />
       {loaderData.supported && (
         <ResizablePanelGroup direction="horizontal" className="">
@@ -90,13 +91,13 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <ResizableHandle withHandle />
           {enablePreviewPanel && (
             <ResizablePanel defaultSize={50} minSize={20}>
-              <PreviewRender />
+              <PreviewSlide />
             </ResizablePanel>
           )}
         </ResizablePanelGroup>
       )}
-      {enableRenderPanel && <RenderDialog />}
       <SlidesPanel />
+      {RenderOutput}
     </div>
   );
 }

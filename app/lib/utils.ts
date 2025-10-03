@@ -23,7 +23,7 @@ export const APP_TEXT_MAPPING = {
   status: {
     [EditorStatus.Error]: "error occured",
     [EditorStatus.Animating]: "animating",
-    [EditorStatus.Idle]: "idle",
+    [EditorStatus.Idle]: "",
     [EditorStatus.LoadingGrammar]: "loading grammar",
     [EditorStatus.LoadingTheme]: "loading theme",
     [EditorStatus.Saving]: "saving project",

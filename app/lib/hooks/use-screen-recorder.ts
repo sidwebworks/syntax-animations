@@ -1,54 +1,3 @@
-import { shikiToMonaco } from "@shikijs/monaco";
-import "shiki-magic-move/dist/style.css";
-import { toast } from "sonner";
-import { getTextmateGrammar, getTextmateTheme } from "./api";
-import { EditorStatus, useEditorStore, useSettingsStore, type TSettingsState } from "./store";
-import { withCache } from "./utils";
-
-export const useSyntaxHighlighter = () => {
-  const editor = useEditorStore();
-  const { onSettingChange, theme } = useSettingsStore();
-  const highlighter = editor.highlighter!;
-  const monaco = editor.monaco!;
-
-  const setLanguage = async (value: TSettingsState["language"]) => {
-    try {
-      const data = await withCache(`textmate_lang_${value}`, async () => {
-        editor.setStatus(EditorStatus.LoadingGrammar);
-        const grammar = await getTextmateGrammar(value);
-        editor.setStatus(EditorStatus.Idle);
-        return grammar;
-      });
-      highlighter.loadLanguageSync(data);
-      monaco.languages.register({ id: value });
-      shikiToMonaco(highlighter, monaco);
-      monaco.editor.getModels().map((m) => monaco.editor.setModelLanguage(m, value));
-      monaco.editor.setTheme(theme);
-      onSettingChange("language", value);
-    } catch (error: any) {
-      toast(`Failed to change language - ${value}`);
-    }
-  };
-
-  const setTheme = async (value: TSettingsState["theme"]) => {
-    try {
-      const data = await withCache(`textmate_theme_${value}`, async () => {
-        editor.setStatus(EditorStatus.LoadingTheme);
-        const theme = await getTextmateTheme(value);
-        editor.setStatus(EditorStatus.Idle);
-        return theme;
-      });
-      highlighter.loadThemeSync(data);
-      shikiToMonaco(highlighter, monaco);
-      onSettingChange("theme", value);
-    } catch (error: any) {
-      toast(`Failed to change theme - ${value}`);
-    }
-  };
-
-  return { setLanguage, setTheme };
-};
-
 import { useCallback, useRef } from "react";
 
 type UseScreenRecorderOptions = {
@@ -60,14 +9,14 @@ export function useScreenRecorder(options?: UseScreenRecorderOptions) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
 
-  const startRecording = useCallback(
+  const start = useCallback(
     async (ref: React.RefObject<HTMLElement | null>) => {
       try {
         const output = ref.current!;
 
         if (!output) throw new Error("Ref element not found");
 
-        output.parentElement!.style.cursor = "none";
+        output!.style.cursor = "none";
 
         // Get display media
         const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -138,14 +87,14 @@ export function useScreenRecorder(options?: UseScreenRecorderOptions) {
     [options]
   );
 
-  const stopRecording = useCallback((ref: React.RefObject<HTMLElement | null>) => {
+  const stop = useCallback((ref: React.RefObject<HTMLElement | null>) => {
     const output = ref.current!;
 
-    if (output) output.parentElement!.style.cursor = "unset";
+    if (output) output!.style.cursor = "unset";
 
     mediaRecorderRef.current?.stop();
     mediaRecorderRef.current = null;
   }, []);
 
-  return { startRecording, stopRecording };
+  return { start, stop };
 }

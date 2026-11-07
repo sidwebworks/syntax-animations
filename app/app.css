@@ -164,10 +164,6 @@ body {
   letter-spacing: var(--tracking-normal);
 }
 
-body {
-  letter-spacing: var(--tracking-normal);
-}
-
 * {
   border-color: var(--border);
 }
@@ -180,21 +176,7 @@ html {
   @apply text-foreground;
 }
 
-monaco-editor {
-  height: 100%;
-  width: 100%;
-}
-
 .mtku {
   text-decoration: none !important;
 }
 
-.mtki {
-  font-style: normal !important;
-}
-
-pre {
-  font-feature-settings: "liga", "calt";
-  font-variation-settings: normal;
-  font-style: "regular";
-}

@@ -30,6 +30,18 @@ The result? Beautiful, intentional animations that are clear, educational, and f
 
 👉 Try it live: https://syntax.rathi.sh
 
+## 🛠 Development
+
+The animation engine is written in Rust and compiled to WebAssembly. You need a Rust toolchain with the `wasm32-unknown-unknown` target to change it:
+
+```sh
+rustup target add wasm32-unknown-unknown
+pnpm build:engine   # rebuilds app/lib/engine/engine.wasm
+pnpm test:engine
+```
+
+The built `engine.wasm` is checked in, so `pnpm dev` works without Rust if you're only touching the app.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to open issues, suggest features, or submit PRs.

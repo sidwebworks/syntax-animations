@@ -1,18 +1,18 @@
-import { CodeEditor } from "~/components/CodeEditor";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
-import { EditorStatus, setup, useEditorStore, useSettingsStore, useTimelineStore } from "~/lib/store";
-import type { Route } from "./+types/index";
-
-import { useInterval } from "@mantine/hooks";
 import { Loader } from "lucide-react";
-import { useBeforeUnload } from "react-router";
+import { useState } from "react";
+import { CodeEditor } from "~/components/CodeEditor";
 import { DeviceSupportDialog } from "~/components/DeviceSupport";
+import { OutputDialog, type Output } from "~/components/OutputDialog";
 import PreviewSlide from "~/components/PreviewSlide";
 import SettingsDialog from "~/components/SettingsDialog";
 import SlidesPanel from "~/components/SlidesPanel";
 import ToolBar from "~/components/ToolBar";
-import { getRequiredBrowserFeatures } from "~/lib/utils";
-import { useRenderOutput } from "~/lib/hooks/use-render-output";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
+import { setupEditor } from "~/lib/editor";
+import { isSupported } from "~/lib/engine";
+import { useSettings } from "~/lib/settings";
+import { loadSlides } from "~/lib/slides";
+import type { Route } from "./+types/index";
 
 export function meta({}: Route.MetaArgs) {
   const title = "Syntax Animations";
@@ -41,16 +41,11 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+let ready: Promise<void> | undefined;
+
 export async function clientLoader() {
-  const features = getRequiredBrowserFeatures();
-
-  const supported = features.every((r) => {
-    const type = typeof r[0];
-    return type === r[1];
-  });
-
-  if (supported) await setup();
-
+  const supported = isSupported();
+  if (supported) await (ready ??= setupEditor().then(loadSlides));
   return { supported };
 }
 
@@ -63,41 +58,32 @@ export function HydrateFallback() {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { enablePreviewPanel, enableRenderPanel } = useSettingsStore();
-  const [RenderOutput, trigger] = useRenderOutput();
-  const save = useTimelineStore((s) => s.save);
-  const setStatus = useEditorStore((s) => s.setStatus);
+  const enablePreviewPanel = useSettings((s) => s.enablePreviewPanel);
+  const [output, setOutput] = useState<Output>();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const onSave = async () => {
-    if (!loaderData.supported) return;
-    setStatus(EditorStatus.Saving);
-    await save();
-    setStatus(EditorStatus.Idle);
-  };
-
-  useInterval(() => onSave(), 5000, { autoInvoke: true });
-  useBeforeUnload(() => onSave());
+  if (!loaderData.supported) return <DeviceSupportDialog supported={false} />;
 
   return (
     <div className="h-full flex flex-col">
-      <DeviceSupportDialog supported={loaderData.supported} />
-      <ToolBar onSave={onSave} onPlay={trigger} />
-      <SettingsDialog />
-      {loaderData.supported && (
-        <ResizablePanelGroup direction="horizontal" className="">
-          <ResizablePanel defaultSize={50}>
-            <CodeEditor />
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          {enablePreviewPanel && (
+      <DeviceSupportDialog supported />
+      <ToolBar output={output} onOutput={setOutput} onSettings={() => setSettingsOpen(true)} />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel defaultSize={50}>
+          <CodeEditor />
+        </ResizablePanel>
+        {enablePreviewPanel && (
+          <>
+            <ResizableHandle withHandle />
             <ResizablePanel defaultSize={50} minSize={20}>
               <PreviewSlide />
             </ResizablePanel>
-          )}
-        </ResizablePanelGroup>
-      )}
+          </>
+        )}
+      </ResizablePanelGroup>
       <SlidesPanel />
-      {RenderOutput}
+      <OutputDialog output={output} onClose={() => setOutput(undefined)} />
     </div>
   );
 }

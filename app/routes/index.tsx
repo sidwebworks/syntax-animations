@@ -1,15 +1,18 @@
 import { Loader } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { CodeEditor } from "~/components/CodeEditor";
 import { DeviceSupportDialog } from "~/components/DeviceSupport";
 import { OutputDialog, type Output } from "~/components/OutputDialog";
 import PreviewSlide from "~/components/PreviewSlide";
 import SettingsDialog from "~/components/SettingsDialog";
+import SlideOptionsBar from "~/components/SlideOptionsBar";
 import SlidesPanel from "~/components/SlidesPanel";
 import ToolBar from "~/components/ToolBar";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
 import { setupEditor } from "~/lib/editor";
 import { isSupported } from "~/lib/engine";
+import { hasProjectLink, openProject, projectFromLink } from "~/lib/project";
 import { useSettings } from "~/lib/settings";
 import { loadSlides } from "~/lib/slides";
 import type { Route } from "./+types/index";
@@ -43,9 +46,20 @@ export function meta({}: Route.MetaArgs) {
 
 let ready: Promise<void> | undefined;
 
+async function setup() {
+  await setupEditor();
+  await loadSlides();
+
+  if (!hasProjectLink()) return;
+  const shared = await projectFromLink();
+  history.replaceState(null, "", location.pathname + location.search);
+  if (!shared) toast("That share link is broken or from a newer version");
+  else if (confirm("Open the shared project? It replaces the slides you have now.")) await openProject(shared);
+}
+
 export async function clientLoader() {
   const supported = isSupported();
-  if (supported) await (ready ??= setupEditor().then(loadSlides));
+  if (supported) await (ready ??= setup());
   return { supported };
 }
 
@@ -70,8 +84,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       <ToolBar output={output} onOutput={setOutput} onSettings={() => setSettingsOpen(true)} />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={50}>
-          <CodeEditor />
+        <ResizablePanel defaultSize={50} className="flex flex-col">
+          <SlideOptionsBar />
+          <div className="min-h-0 flex-1">
+            <CodeEditor />
+          </div>
         </ResizablePanel>
         {enablePreviewPanel && (
           <>

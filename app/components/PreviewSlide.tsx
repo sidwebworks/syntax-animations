@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
-import { slideCode, useSlides, watchSlide } from "~/lib/slides";
+import { slideCode, useSlides, watchSlide, type SlideData } from "~/lib/slides";
 import { play, useScene, useSceneCanvas } from "./scene";
 
 const EDIT_DELAY = 800;
 
-/** The open slide, animating from whatever was shown before whenever it changes. */
+/** The open slide, animating from whatever was shown before whenever its code or options change. */
 function PreviewSlide() {
   const active = useSlides((s) => s.active);
-  const [codes, setCodes] = useState<[string, string]>();
+  const options = useSlides((s) => s.options[s.active]);
+  const [shown, setShown] = useState<[SlideData, SlideData]>();
 
   useEffect(() => {
-    const show = (code: string) => setCodes((prev) => [prev?.[1] ?? code, code]);
+    const show = (code: string) =>
+      setShown((prev) => {
+        const next = { ...options, code };
+        return [prev?.[1] ?? next, next];
+      });
     show(slideCode(active));
 
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -22,9 +27,9 @@ function PreviewSlide() {
       clearTimeout(timer);
       unwatch();
     };
-  }, [active]);
+  }, [active, options]);
 
-  const { scene, error } = useScene(codes, 0);
+  const { scene, error } = useScene(shown, 0);
   const { ref, draw } = useSceneCanvas(scene);
 
   useEffect(() => (scene ? play(scene.duration, draw) : undefined), [scene, draw]);

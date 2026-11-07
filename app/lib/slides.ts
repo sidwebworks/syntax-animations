@@ -7,8 +7,22 @@ import { useSettings } from "./settings";
 
 export type SlideID = string;
 
-/** Slide code lives in Monaco models; this only tracks which slides exist and which is open. */
-export const useSlides = create<{ order: SlideID[]; active: SlideID }>(() => ({ order: [], active: "" }));
+type SlideOptions = {
+  /** Lines to keep bright, like `3-5, 8`. Empty focuses everything. */
+  focus?: string;
+  /** Seconds this slide stays on screen, instead of the global setting. */
+  hold?: number;
+};
+
+/** A slide as it's saved and shared. */
+export type SlideData = SlideOptions & { code: string };
+
+/** Slide code lives in Monaco models; this tracks which slides exist, their options and which is open. */
+export const useSlides = create<{ order: SlideID[]; active: SlideID; options: Record<SlideID, SlideOptions> }>(() => ({
+  order: [],
+  active: "",
+  options: {},
+}));
 
 export const slidePath = (id: SlideID) => `file://${id}/`;
 
@@ -21,7 +35,21 @@ function slideModel(id: SlideID) {
 
 export const slideCode = (id: SlideID) => slideModel(id).getValue();
 
-export const allSlideCode = () => useSlides.getState().order.map(slideCode);
+export function allSlides(): SlideData[] {
+  const { order, options } = useSlides.getState();
+  return order.map((id) => ({ ...options[id], code: slideCode(id) }));
+}
+
+export const setSlideOptions = (id: SlideID, patch: SlideOptions) =>
+  useSlides.setState((s) => ({ options: { ...s.options, [id]: { ...s.options[id], ...patch } } }));
+
+/** `"3-5, 8"` as 1-based inclusive ranges. Anything unreadable is ignored. */
+export function parseLineRanges(text = ""): [number, number][] {
+  return text.split(",").flatMap((part) => {
+    const [a, b = a] = part.split("-").map((n) => Number.parseInt(n.trim(), 10));
+    return a > 0 && b >= a ? [[a, Math.min(b, 2 ** 31)] as [number, number]] : [];
+  });
+}
 
 /** Calls `onChange` with the new code after every edit. Returns an unsubscribe function. */
 export function watchSlide(id: SlideID, onChange: (code: string) => void) {
@@ -37,24 +65,28 @@ function createSlide(code = "", id = nanoid()) {
   return id;
 }
 
-function append(id: SlideID) {
-  useSlides.setState((s) => ({ order: [...s.order, id], active: id }));
+function append(id: SlideID, options: SlideOptions = {}) {
+  useSlides.setState((s) => ({ order: [...s.order, id], active: id, options: { ...s.options, [id]: options } }));
 }
 
 export const addSlide = () => append(createSlide());
 
-export const duplicateSlide = (from: SlideID) => append(createSlide(slideCode(from)));
+export const duplicateSlide = (from: SlideID) => append(createSlide(slideCode(from)), useSlides.getState().options[from]);
 
 export function removeSlide(id: SlideID) {
   const { order, active } = useSlides.getState();
   if (order.length <= 1) return;
   const index = order.indexOf(id);
   const next = order.filter((s) => s !== id);
-  useSlides.setState({ order: next, active: active === id ? next[Math.max(0, index - 1)] : active });
+  const { [id]: _, ...options } = useSlides.getState().options;
+  useSlides.setState({ order: next, active: active === id ? next[Math.max(0, index - 1)] : active, options });
   slideModel(id).dispose();
 }
 
 export const selectSlide = (id: SlideID) => useSlides.setState({ active: id });
+
+/** The open slide's 1-based position. */
+export const useFrameNumber = () => useSlides((s) => s.order.indexOf(s.active) + 1);
 
 /** Moves `id` to where `to` is now, shifting the rest. */
 export function moveSlide(id: SlideID, to: SlideID) {
@@ -68,18 +100,25 @@ let db: LocalForage | undefined;
 // One store per origin, so previews on other hostnames don't share projects.
 const project = () => (db ??= LocalForage.createInstance({ name: "project_data", storeName: location.hostname }));
 
-type SavedSlides = Record<SlideID, { code: string }>;
+type SavedSlides = Record<SlideID, SlideData>;
 
 export async function loadSlides() {
   const order = (await project().getItem<SlideID[]>("order")) ?? [];
   const saved = (await project().getItem<SavedSlides>("slides")) ?? {};
+  const kept = order.filter((id) => saved[id]);
+  replaceSlides(kept.map((id) => saved[id]), kept);
 
-  const ids = order.filter((id) => saved[id]).map((id) => createSlide(saved[id].code, id));
-  if (ids.length === 0) ids.push(createSlide());
-  useSlides.setState({ order: ids, active: ids[0] });
-
-  useSlides.subscribe((s, prev) => s.order !== prev.order && scheduleSave());
+  useSlides.subscribe((s, prev) => (s.order !== prev.order || s.options !== prev.options) && scheduleSave());
   window.addEventListener("beforeunload", () => void saveSlides());
+}
+
+/** Swaps every slide for `slides`, keeping `ids` when given. */
+export function replaceSlides(slides: SlideData[], ids: SlideID[] = []) {
+  for (const id of useSlides.getState().order) slideModel(id).dispose();
+  const order = slides.map((s, i) => createSlide(s.code, ids[i]));
+  if (order.length === 0) order.push(createSlide());
+  const options = Object.fromEntries(slides.map(({ code, ...rest }, i) => [order[i], rest]));
+  useSlides.setState({ order, active: order[0], options });
 }
 
 export const useSaving = create<{ saving: boolean }>(() => ({ saving: false }));
@@ -96,7 +135,8 @@ export async function saveSlides() {
   useSaving.setState({ saving: true });
   try {
     const { order } = useSlides.getState();
-    const slides: SavedSlides = Object.fromEntries(order.map((id) => [id, { code: slideCode(id) }]));
+    const all = allSlides();
+    const slides: SavedSlides = Object.fromEntries(order.map((id, i) => [id, all[i]]));
     await project().setItem("order", order);
     await project().setItem("slides", slides);
   } catch (e) {

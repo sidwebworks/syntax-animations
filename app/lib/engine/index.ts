@@ -113,8 +113,9 @@ export async function createScene(highlighter: Highlighter, codes: string[], o: 
     result.tokens.forEach((line, i) => {
       if (i > 0) slide.push(0, 0, 0, 0, KIND_NEWLINE);
       for (const token of line) {
-        // Words and single punctuation marks, so a diff can match part of a token.
-        for (const run of token.content.match(/\s+|[\p{L}\p{N}_$]+|[^\s\p{L}\p{N}_$]/gu) ?? []) {
+        // Split into words and operator runs so a diff can match part of a token. Operators stay
+        // whole so ligatures like `=>` and `!==` still render.
+        for (const run of token.content.match(/\s+|[\p{L}\p{N}_$]+|[^\s\p{L}\p{N}_$]+/gu) ?? []) {
           const cols = columns(run);
           if (/^\s/.test(run)) slide.push(0, 0, 0, cols, KIND_SPACE);
           else {

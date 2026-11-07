@@ -1,10 +1,27 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { renderMp4 } from "~/lib/engine";
-import { allSlideCode } from "~/lib/slides";
+import { renderVideo } from "~/lib/engine";
+import { useSettings } from "~/lib/settings";
+import { download } from "~/lib/utils";
+import { allSlides } from "~/lib/slides";
 import { play, useScene, useSceneCanvas } from "./scene";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { Segmented } from "./ui/segmented";
 
 export type Output = "play" | "export";
+
+const RESOLUTIONS = [
+  [720, "720p"],
+  [1080, "1080p"],
+  [2160, "4K"],
+] as const;
+const FRAME_RATES = [
+  [30, "30 fps"],
+  [60, "60 fps"],
+] as const;
+const FORMATS = [
+  ["mp4", "MP4"],
+  ["webm", "WebM"],
+] as const;
 
 export function OutputDialog({ output, onClose }: { output?: Output; onClose: () => void }) {
   return (
@@ -22,8 +39,8 @@ export function OutputDialog({ output, onClose }: { output?: Output; onClose: ()
 }
 
 function Player() {
-  const [codes] = useState(allSlideCode);
-  const { scene, error } = useScene(codes);
+  const [slides] = useState(allSlides);
+  const { scene, error } = useScene(slides);
   const { ref, draw } = useSceneCanvas(scene);
   const scrub = useRef<HTMLInputElement>(null);
   const clock = useRef<HTMLSpanElement>(null);
@@ -83,46 +100,104 @@ function Player() {
 }
 
 function Exporter({ onDone }: { onDone: () => void }) {
-  const [codes] = useState(allSlideCode);
-  const { scene, error } = useScene(codes);
+  const [slides] = useState(allSlides);
+  const { scene, error } = useScene(slides);
   const { ref, draw } = useSceneCanvas(scene);
-  const [progress, setProgress] = useState(0);
+  const { resolution, fps, format, onSettingChange } = useSettings();
+  const [music, setMusic] = useState<{ name: string; buffer: AudioBuffer }>();
+  const [progress, setProgress] = useState<number>();
   const [failure, setFailure] = useState<string>();
-  const done = useRef(onDone);
-  done.current = onDone;
+  const abort = useRef<AbortController>(undefined);
 
-  useEffect(() => {
+  useEffect(() => () => abort.current?.abort(), []);
+
+  async function pickMusic(file: File | undefined) {
+    if (!file) return setMusic(undefined);
+    try {
+      const buffer = await new OfflineAudioContext(2, 1, 48000).decodeAudioData(await file.arrayBuffer());
+      setMusic({ name: file.name, buffer });
+    } catch {
+      setFailure(`Couldn't read ${file.name} as audio`);
+    }
+  }
+
+  async function start() {
     if (!scene) return;
-    const abort = new AbortController();
-    renderMp4(scene, {
-      signal: abort.signal,
-      onProgress: (p, t) => {
-        draw(t);
-        setProgress(Math.floor(p * 100));
-      },
-    }).then(
-      (video) => {
-        download(video, "syntax-animation.mp4");
-        done.current();
-      },
-      (e) => abort.signal.aborted || setFailure(e instanceof Error ? e.message : String(e))
-    );
-
-    return () => abort.abort();
-  }, [scene, draw]);
+    abort.current = new AbortController();
+    const { signal } = abort.current;
+    setFailure(undefined);
+    setProgress(0);
+    try {
+      const video = await renderVideo(scene, {
+        resolution,
+        fps,
+        format,
+        music: music?.buffer,
+        signal,
+        onProgress: (p, t) => {
+          draw(t);
+          setProgress(Math.floor(p * 100));
+        },
+      });
+      download(video, `syntax-animation.${format}`);
+      onDone();
+    } catch (e) {
+      if (signal.aborted) return;
+      setProgress(undefined);
+      setFailure(e instanceof Error ? e.message : String(e));
+    }
+  }
 
   return (
     <Stage canvas={<canvas ref={ref} className="h-full w-full object-contain" />} background={scene?.background}>
-      {error || failure ? (
-        <p className="text-destructive">{error || failure}</p>
-      ) : (
+      {progress !== undefined ? (
         <>
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
             <div className="h-full origin-left bg-primary" style={{ transform: `scaleX(${progress / 100})` }} />
           </div>
-          <span className="w-24 text-right font-mono tabular-nums text-muted-foreground">
-            {scene ? `${progress}%` : "preparing"}
-          </span>
+          <span className="w-24 text-right font-mono tabular-nums text-muted-foreground">{progress}%</span>
+        </>
+      ) : (
+        <>
+          <Segmented
+            label="Resolution"
+            value={resolution}
+            options={RESOLUTIONS}
+            onChange={(v) => onSettingChange("resolution", v)}
+          />
+          <Segmented
+            label="Frame rate"
+            value={fps}
+            options={FRAME_RATES}
+            onChange={(v) => onSettingChange("fps", v)}
+          />
+          <Segmented
+            label="Format"
+            value={format}
+            options={FORMATS}
+            onChange={(v) => onSettingChange("format", v)}
+          />
+          <label className="flex min-w-0 cursor-pointer items-center gap-2 text-muted-foreground">
+            <span className="rounded-md border px-3 py-1.5 transition-colors hover:text-foreground">
+              {music ? "Change music" : "Add music"}
+            </span>
+            <span className="truncate text-xs">{music?.name}</span>
+            <input
+              type="file"
+              accept="audio/*"
+              className="sr-only"
+              onChange={(e) => pickMusic(e.currentTarget.files?.[0])}
+            />
+          </label>
+          {failure || error ? <p className="min-w-0 truncate text-destructive">{failure || error}</p> : null}
+          <button
+            type="button"
+            disabled={!scene}
+            onClick={start}
+            className="ml-auto rounded-md bg-primary px-4 py-1.5 font-medium text-primary-foreground transition-transform duration-150 active:scale-[0.97] disabled:opacity-50"
+          >
+            Export
+          </button>
         </>
       )}
     </Stage>
@@ -136,13 +211,4 @@ function Stage({ canvas, background, children }: { canvas: ReactNode; background
       <div className="flex items-center gap-4 border-t bg-background px-5 py-3 text-sm">{children}</div>
     </div>
   );
-}
-
-function download(blob: Blob, name: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

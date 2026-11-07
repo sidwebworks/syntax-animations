@@ -2,45 +2,63 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { CODE_FONT, TAB_SIZE } from "~/lib/code-style";
 import { editor } from "~/lib/editor";
 import { createScene, type Scene } from "~/lib/engine";
-import { useSettings } from "~/lib/settings";
+import { ASPECTS, BACKGROUNDS, useSettings } from "~/lib/settings";
+import { parseLineRanges, type SlideData } from "~/lib/slides";
 
-/** `hold` overrides the slide interval setting. */
-export function useScene(codes: string[] | undefined, hold?: number) {
-  const { language, theme, slideInterval, transition, stagger, lineNumbers } = useSettings();
+/** `hold` overrides every slide's hold time. */
+export function useScene(slides: SlideData[] | undefined, hold?: number) {
+  const settings = useSettings();
   const [scene, setScene] = useState<Scene>();
   const [error, setError] = useState<string>();
-  const key = codes && JSON.stringify(codes);
-  hold ??= slideInterval;
+  const options = {
+    lang: settings.language,
+    theme: settings.theme,
+    font: CODE_FONT,
+    tabSize: TAB_SIZE,
+    hold: hold ?? settings.slideInterval,
+    transition: settings.transition,
+    stagger: settings.stagger,
+    lineNumbers: settings.lineNumbers,
+    typing: settings.typing,
+    frame: {
+      aspect: ASPECTS[settings.aspect],
+      background: BACKGROUNDS[settings.background],
+      padding: settings.padding,
+      title: settings.windowChrome ? settings.title : null,
+    },
+  };
+  const key = slides && JSON.stringify([slides, hold, options]);
 
   useEffect(() => {
-    if (!codes) return;
+    if (!slides) return;
     let built: Scene | undefined;
     let stale = false;
     setError(undefined);
 
-    createScene(editor().highlighter, codes, {
-      lang: language,
-      theme,
-      font: CODE_FONT,
-      tabSize: TAB_SIZE,
-      hold,
-      transition,
-      stagger,
-      lineNumbers,
-    }).then(
+    const input = slides.map((s) => ({
+      code: s.code,
+      hold: hold ?? s.hold,
+      focus: parseLineRanges(s.focus),
+    }));
+    createScene(editor().highlighter, input, options).then(
       (s) => {
         if (stale) return s.dispose();
         built = s;
         setScene(s);
       },
-      (e) => stale || setError(e instanceof Error ? e.message : String(e))
+      (e) => {
+        if (stale) return;
+        setScene(undefined);
+        setError(e instanceof Error ? e.message : String(e));
+      }
     );
 
     return () => {
       stale = true;
       built?.dispose();
     };
-  }, [key, language, theme, hold, transition, stagger, lineNumbers]);
+    // `key` covers everything the scene is built from.
+  }, [key]);
 
   return { scene, error };
 }

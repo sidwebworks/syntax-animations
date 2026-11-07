@@ -18,6 +18,16 @@ The result? Beautiful, intentional animations that are clear, educational, and f
 
 - 📱 Perfect for sharing – great for social media, tutorials, or classroom use.
 
+- 🔦 Focus lines – dim everything except the lines that matter on each slide.
+
+- ⌨️ Typing transition – new code types itself in with a cursor.
+
+- 🖼 Framing – aspect ratio presets, gradient backgrounds and a window title bar.
+
+- 🎞 Export – MP4 or WebM up to 4K, 30 or 60 fps, with optional background music.
+
+- 🔗 Projects – save to a file or share a link that carries the whole project.
+
 ## 🎬 Usage
 
 - Paste or write your code.

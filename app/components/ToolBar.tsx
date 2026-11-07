@@ -3,7 +3,7 @@ import { DownloadIcon, PlayIcon, Settings } from "lucide-react";
 import { Link } from "react-router";
 import { useEditorLoading } from "~/lib/editor";
 import { useSettings } from "~/lib/settings";
-import { saveSlides, useSaving, useSlides } from "~/lib/slides";
+import { saveSlides, useFrameNumber, useSaving } from "~/lib/slides";
 import type { Output } from "./OutputDialog";
 import { Button } from "./ui/button";
 import { Toggle } from "./ui/toggle";
@@ -12,7 +12,7 @@ function ToolBar(props: { output?: Output; onOutput: (output: Output) => void; o
   const loading = useEditorLoading((s) => s.loading);
   const saving = useSaving((s) => s.saving);
   const { enablePreviewPanel, enableSlidesPanel, onSettingChange } = useSettings();
-  const frame = useSlides((s) => s.order.indexOf(s.active) + 1);
+  const frame = useFrameNumber();
 
   return (
     <nav className="flex w-full justify-between items-center px-2 py-1.5 gap-2 h-12">

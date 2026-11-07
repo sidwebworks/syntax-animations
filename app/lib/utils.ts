@@ -1,44 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { httpCache } from "./cache";
-import { EditorStatus } from "./store";
-import type { JSTypeofResult } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-export const withCache = async <T>(key: string, fn: () => T | Promise<T>) => {
-  const existing = await httpCache.getItem(key);
-
-  if (existing) return existing;
-
-  const result = await fn();
-  httpCache.setItem(key, result);
-
-  return result;
-};
-
-export const APP_TEXT_MAPPING = {
-  status: {
-    [EditorStatus.Error]: "error occured",
-    [EditorStatus.Animating]: "animating",
-    [EditorStatus.Idle]: "",
-    [EditorStatus.LoadingGrammar]: "loading grammar",
-    [EditorStatus.LoadingTheme]: "loading theme",
-    [EditorStatus.Saving]: "saving project",
-  },
-};
-
-export const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
-
-export const getRequiredBrowserFeatures = (): [any, JSTypeofResult][] => {
-  return [
-    [navigator?.mediaDevices?.getDisplayMedia, "function"],
-    // @ts-expect-error
-    [window.RestrictionTarget, "function"],
-    // @ts-expect-error
-    [window.CropTarget, "function"],
-    [MediaRecorder, "function"],
-  ];
-};

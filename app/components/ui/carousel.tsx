@@ -1,7 +1,6 @@
 import * as React from "react";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -39,7 +38,6 @@ function useCarousel() {
   return context;
 }
 
-const plugins = [WheelGesturesPlugin({})];
 function Carousel({
   orientation = "horizontal",
   opts,

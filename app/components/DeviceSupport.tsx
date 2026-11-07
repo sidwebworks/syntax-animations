@@ -1,4 +1,4 @@
-import { ChromeIcon, Hammer } from "lucide-react";
+import { ChromeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   AlertDialogTitle,
-} from "~/components/ui/alert-dialog"; // Adjust path as needed
+} from "~/components/ui/alert-dialog";
 import { Button } from "./ui/button";
 
 export function DeviceSupportDialog(props: { supported: boolean }) {
@@ -20,9 +20,7 @@ export function DeviceSupportDialog(props: { supported: boolean }) {
       setOpen(!props.supported || window.innerWidth < 768);
     };
 
-    check(); // Initial check
-
-    // Optional: Re-check on resize
+    check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, [props.supported]);
@@ -32,29 +30,23 @@ export function DeviceSupportDialog(props: { supported: boolean }) {
       <AlertDialogOverlay className="backdrop-blur-[1px]" />
       <AlertDialogContent className="items-center">
         <AlertDialogHeader>
-          <AlertDialogTitle>Unsupported Browser</AlertDialogTitle>
+          <AlertDialogTitle>{props.supported ? "Screen too small" : "Unsupported browser"}</AlertDialogTitle>
           <AlertDialogDescription>
-            This app requires browser APIs that are not available on some browsers (e.g. screen capture or
-            crop-to-target). Please use a desktop browser based on Chromium for the best experience.
+            {props.supported
+              ? "The editor needs a desktop-sized window."
+              : "This app renders video with WebCodecs and WebAssembly, which this browser doesn't support. Please use a recent desktop version of Chrome, Edge, Safari or Firefox."}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <AlertDialogFooter className="mt-4 grid sm:grid-cols-2">
+        {!props.supported && (
+        <AlertDialogFooter className="mt-4 grid">
           <Button className="px-16 py-7 rounded-full" size="lg" variant={"outline"} asChild>
-            <Link to="https://chromeenterprise.google/" rel="noreferrer noopener">
+            <Link to="https://www.google.com/chrome/" rel="noreferrer noopener">
               Get Chrome <ChromeIcon className="size-6 stroke-1" />
             </Link>
           </Button>
-
-          <Button className="px-16 py-7 rounded-full" size="lg" variant={"outline"} asChild>
-            <Link
-              to="https://www.chromium.org/chromium-os/developer-library/getting-started/build-chromium/"
-              rel="noreferrer noopener"
-            >
-              Build from source <Hammer className="size-6 stroke-1" />
-            </Link>
-          </Button>
         </AlertDialogFooter>
+        )}
       </AlertDialogContent>
     </AlertDialog>
   );

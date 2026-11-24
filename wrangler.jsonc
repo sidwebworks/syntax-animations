@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Must match the Worker name in the Cloudflare dashboard.
+  "name": "syntax-animations",
+  "compatibility_date": "2026-11-01",
+  // ssr:false + prerender: the build is static files only (build/server is deleted).
+  "assets": {
+    "directory": "./build/client",
+    "not_found_handling": "single-page-application"
+  }
+}

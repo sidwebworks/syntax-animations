@@ -1,6 +1,5 @@
 import { GitHubLogoIcon, LayersIcon, ViewVerticalIcon } from "@radix-ui/react-icons";
 import { DownloadIcon, PlayIcon, Settings } from "lucide-react";
-import { Link } from "react-router";
 import { useEditorLoading } from "~/lib/editor";
 import { useSettings } from "~/lib/settings";
 import { saveSlides, useFrameNumber, useSaving } from "~/lib/slides";
@@ -17,9 +16,9 @@ function ToolBar(props: { output?: Output; onOutput: (output: Output) => void; o
   return (
     <nav className="flex w-full justify-between items-center px-2 py-1.5 gap-2 h-12">
       <Button variant={"ghost"} size="icon" asChild>
-        <Link target="_blank" rel="noreferrer noopener" to="https://github.com/sidwebworks/syntax-animations">
+        <a target="_blank" rel="noreferrer noopener" href="https://github.com/sidwebworks/syntax-animations">
           <GitHubLogoIcon className="text-muted-foreground" />
-        </Link>
+        </a>
       </Button>
 
       <div className="text-sm [&>*:nth-child(1)]:border-r-0 [&>*:nth-child(1)]:rounded-r-none [&>*:last-child]:border-l-0 [&>*:last-child]:rounded-l-none text-center mx-auto max-w-max justify-center absolute text-muted-foreground inset-x-0 flex items-center">

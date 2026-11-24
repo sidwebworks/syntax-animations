@@ -1,6 +1,5 @@
 import { ChromeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -41,9 +40,9 @@ export function DeviceSupportDialog(props: { supported: boolean }) {
         {!props.supported && (
         <AlertDialogFooter className="mt-4 grid">
           <Button className="px-16 py-7 rounded-full" size="lg" variant={"outline"} asChild>
-            <Link to="https://www.google.com/chrome/" rel="noreferrer noopener">
+            <a href="https://www.google.com/chrome/" rel="noreferrer noopener">
               Get Chrome <ChromeIcon className="size-6 stroke-1" />
-            </Link>
+            </a>
           </Button>
         </AlertDialogFooter>
         )}

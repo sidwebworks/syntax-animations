@@ -24,7 +24,8 @@ export const useSlides = create<{ order: SlideID[]; active: SlideID; options: Re
   options: {},
 }));
 
-export const slidePath = (id: SlideID) => `file://${id}/`;
+// Under file:/// so the TS service finds fetched types in file:///node_modules. .tsx parses both TS and JSX.
+export const slidePath = (id: SlideID) => `file:///slides/${id}.tsx`;
 
 function slideModel(id: SlideID) {
   const { monaco } = editor();

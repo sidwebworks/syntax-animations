@@ -1,3 +1,4 @@
+import { createRoute } from "@tanstack/react-router";
 import { Loader } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,34 +16,7 @@ import { isSupported } from "~/lib/engine";
 import { hasProjectLink, openProject, projectFromLink } from "~/lib/project";
 import { useSettings } from "~/lib/settings";
 import { loadSlides } from "~/lib/slides";
-import type { Route } from "./+types/index";
-
-export function meta({}: Route.MetaArgs) {
-  const title = "Syntax Animations";
-  const description = "Easily animate code snippets and save them as videos.";
-  const url = "https://syntax.rathi.sh";
-  const image = "https://syntax.rathi.sh/og_preview.png";
-
-  return [
-    { title },
-    { name: "description", content: description },
-
-    // Open Graph
-    { property: "og:url", content: url },
-    { property: "og:type", content: "website" },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:image", content: image },
-
-    // Twitter
-    { name: "twitter:card", content: "summary_large_image" },
-    { property: "twitter:domain", content: "syntax.rathi.sh" },
-    { property: "twitter:url", content: url },
-    { name: "twitter:title", content: title },
-    { name: "twitter:description", content: description },
-    { name: "twitter:image", content: image },
-  ];
-}
+import { rootRoute } from "~/root";
 
 let ready: Promise<void> | undefined;
 
@@ -57,13 +31,13 @@ async function setup() {
   else if (confirm("Open the shared project? It replaces the slides you have now.")) await openProject(shared);
 }
 
-export async function clientLoader() {
+async function loader() {
   const supported = isSupported();
   if (supported) await (ready ??= setup());
   return { supported };
 }
 
-export function HydrateFallback() {
+function Pending() {
   return (
     <div className="grid w-full h-full place-content-center">
       <Loader className="animate-spin" />
@@ -71,7 +45,8 @@ export function HydrateFallback() {
   );
 }
 
-export default function Home({ loaderData }: Route.ComponentProps) {
+function Home() {
+  const loaderData = indexRoute.useLoaderData();
   const enablePreviewPanel = useSettings((s) => s.enablePreviewPanel);
   const [output, setOutput] = useState<Output>();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -104,3 +79,5 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     </div>
   );
 }
+
+export const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: "/", loader, pendingComponent: Pending, component: Home });

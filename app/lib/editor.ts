@@ -33,9 +33,61 @@ export async function setupEditor() {
   monaco.languages.register({ id: language });
   shikiToMonaco(highlighter, monaco);
 
-  // Slides are snippets, so type errors against missing imports are just noise.
-  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({ noSemanticValidation: true });
-  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({ noSemanticValidation: true });
+  setupTypeScript(monaco);
+}
+
+function setupTypeScript(monaco: Monaco) {
+  const { typescriptDefaults, javascriptDefaults } = monaco.languages.typescript;
+  for (const defaults of [typescriptDefaults, javascriptDefaults]) {
+    defaults.setCompilerOptions({
+      allowNonTsExtensions: true,
+      target: 99, // ESNext
+      module: 99, // ESNext
+      // Bundler (missing from Monaco's enum), so package.json "exports" (effect/Schema etc.) resolve
+      moduleResolution: 100 as never,
+      jsx: 4, // ReactJSX
+      strict: true,
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
+    });
+  }
+
+  // Off by default: slides are snippets, so type errors on half-written code are usually noise.
+  const showTypeErrors = (on: boolean) => {
+    for (const defaults of [typescriptDefaults, javascriptDefaults]) defaults.setDiagnosticsOptions({ noSemanticValidation: !on });
+  };
+  showTypeErrors(useSettings.getState().typeErrors);
+  useSettings.subscribe((s, prev) => s.typeErrors !== prev.typeErrors && showTypeErrors(s.typeErrors));
+
+  // Fetch .d.ts files for whatever the slides import (from jsDelivr) and hand them to Monaco.
+  // ATA only needs ts.preProcessFile, so TypeScript loads lazily, the first time a TS/JS slide changes.
+  let acquire: Promise<(code: string) => Promise<void>> | undefined;
+  const fetchTypes = (code: string) =>
+    (acquire ??= Promise.all([import("@typescript/ata"), import("typescript")]).then(([{ setupTypeAcquisition }, ts]) =>
+      setupTypeAcquisition({
+        projectName: "syntax-animations",
+        typescript: ts.default ?? ts,
+        delegate: {
+          receivedFile(code, path) {
+            typescriptDefaults.addExtraLib(code, `file://${path}`);
+            javascriptDefaults.addExtraLib(code, `file://${path}`);
+          },
+          errorMessage: (message, error) => console.warn(`[types] ${message}`, error),
+        },
+      }),
+    )).then((ata) => ata(code));
+
+  const isScript = (model: { getLanguageId(): string }) => ["typescript", "javascript"].includes(model.getLanguageId());
+  monaco.editor.onDidCreateModel((model) => {
+    let timer: ReturnType<typeof setTimeout>;
+    const check = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => isScript(model) && fetchTypes(model.getValue()), 500);
+    };
+    check();
+    model.onDidChangeContent(check);
+    model.onDidChangeLanguage(check);
+  });
 }
 
 export async function setLanguage(language: BundledLanguage) {

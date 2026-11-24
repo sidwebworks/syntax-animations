@@ -3,9 +3,9 @@
   // Must match the Worker name in the Cloudflare dashboard.
   "name": "syntax-animations",
   "compatibility_date": "2026-11-01",
-  // ssr:false + prerender: the build is static files only (build/server is deleted).
+  // Static SPA: vite build output only, no server.
   "assets": {
-    "directory": "./build/client",
+    "directory": "./dist",
     "not_found_handling": "single-page-application"
   }
 }

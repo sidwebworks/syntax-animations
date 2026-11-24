@@ -35,6 +35,8 @@ export type Settings = {
 
   language: BundledLanguage;
   theme: BundledTheme;
+  /** Show TypeScript type errors in the editor. Editor-only, never part of the video. */
+  typeErrors: boolean;
 
   /** Seconds each slide stays on screen. */
   slideInterval: number;
@@ -86,6 +88,7 @@ export const useSettings = create(
 
       language: "typescript",
       theme: "catppuccin-mocha",
+      typeErrors: false,
 
       slideInterval: 2,
       transition: 0.8,

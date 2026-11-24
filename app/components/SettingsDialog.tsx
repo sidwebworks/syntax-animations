@@ -85,6 +85,9 @@ function SettingsDialog(props: { open: boolean; onOpenChange: (open: boolean) =>
             >
               <TextIcon className="size-4" />
             </ComboboxPopover>
+            <Row label="Show type errors" htmlFor="type-errors">
+              <Switch id="type-errors" checked={settings.typeErrors} onCheckedChange={(v) => set("typeErrors", v)} />
+            </Row>
           </TabsContent>
 
           <TabsContent value="animation" className={tab}>

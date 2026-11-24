@@ -38,7 +38,7 @@ export default function InputNumber({
   );
 }
 
-function CursorGrowIcon(props: React.ComponentProps<"svg">) {
+export function CursorGrowIcon(props: React.ComponentProps<"svg">) {
   return (
     <svg
       width="26"
